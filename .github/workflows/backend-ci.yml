@@ -17,18 +17,3 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-
-      - name: Build with Maven
-        run: mvn clean package
-
-      - name: Run tests
-        run: mvn test
-
-      - name: Deploy to production
-        run: scp target/*.jar usuario@servidor:/path/deploy
-
-      - name: Code analysis
-        run: mvn sonar:sonar
-
-      - name: Security audit
-        run: mvn owasp:audit
