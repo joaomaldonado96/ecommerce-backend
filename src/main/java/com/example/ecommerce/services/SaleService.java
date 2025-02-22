@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-class SaleService {
+public class SaleService {
     private final SaleRepository saleRepository;
     private final PersonRepository personRepository;
 
@@ -24,6 +24,10 @@ class SaleService {
 
     public Optional<Sale> getSaleById(Long id) {
         return saleRepository.findById(id);
+    }
+
+    public List<Object[]> getTop5BestSellingProducts() {
+        return saleRepository.findTop5BestSellingProducts();
     }
 
     @Transactional

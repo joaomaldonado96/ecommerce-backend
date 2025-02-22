@@ -1,4 +1,5 @@
 package com.example.ecommerce.services;
+import com.example.ecommerce.entities.Product;
 import com.example.ecommerce.entities.SaleProduct;
 import com.example.ecommerce.entities.SaleProductPK;
 import com.example.ecommerce.repositories.SaleProductRepository;
@@ -7,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-class SaleProductService {
+public class SaleProductService {
     private final SaleProductRepository saleProductRepository;
 
     public SaleProductService(SaleProductRepository saleProductRepository) {
@@ -21,6 +22,10 @@ class SaleProductService {
     @Transactional
     public SaleProduct saveSaleProduct(SaleProduct saleProduct) {
         return saleProductRepository.save(saleProduct);
+    }
+
+    public List<Product> getTop5BestSellingProducts() {
+        return saleProductRepository.findTop5BestSellingProducts();
     }
 
     @Transactional

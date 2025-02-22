@@ -21,11 +21,4 @@ public class Person {
     private Boolean isFrequentCustomer;
     private Instant createdAt;
 
-    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @ToString.Exclude
-    private Set<Sale> sales;
-
-    @OneToMany(mappedBy = "updatedByPerson", fetch = FetchType.LAZY)
-    @ToString.Exclude
-    private Set<Product> updatedProducts;
 }

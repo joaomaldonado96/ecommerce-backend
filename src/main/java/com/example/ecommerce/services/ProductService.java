@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-class ProductService {
+public class ProductService {
     private final ProductRepository productRepository;
     private final PersonRepository personRepository;
 
@@ -26,6 +26,10 @@ class ProductService {
 
     public Optional<Product> getProductById(Long id) {
         return productRepository.findById(id);
+    }
+
+    public List<Product> getActiveProducts() {
+        return productRepository.findByStockGreaterThan(0);
     }
 
     @Transactional
