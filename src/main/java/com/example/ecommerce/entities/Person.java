@@ -2,7 +2,6 @@ package com.example.ecommerce.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
-import java.util.Set;
 
 
 @Entity
