@@ -82,6 +82,18 @@ class SaleControllerTest {
     }
 
     @Test
+    void testGetSalesByPersonEmail() {
+        when(saleService.getSalesByPersonEmail("test@example.com")).thenReturn(List.of(sale));
+
+        List<Sale> sales = saleController.getSalesByPersonEmail("test@example.com");
+
+        assertFalse(sales.isEmpty());
+        assertEquals(1, sales.size());
+        assertEquals("test@example.com", sales.get(0).getPerson().getEmail());
+        verify(saleService, times(1)).getSalesByPersonEmail("test@example.com");
+    }
+
+    @Test
     void testFindTop5FrequentCustomers() {
         List<Object[]> topCustomers = List.of(
                 new Object[]{"test@example.com", "Juan", 2.5},

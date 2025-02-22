@@ -28,6 +28,11 @@ class SaleController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/person/{email}")
+    public List<Sale> getSalesByPersonEmail(@PathVariable String email) {
+        return saleService.getSalesByPersonEmail(email);
+    }
+
     @GetMapping("/top-frequent-customers")
     public List<Object[]> findTop5FrequentCustomers() {
         return saleService.findTop5FrequentCustomers();

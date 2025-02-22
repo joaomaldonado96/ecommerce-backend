@@ -26,6 +26,10 @@ public class SaleService {
         return saleRepository.findById(id);
     }
 
+    public List<Sale> getSalesByPersonEmail(String email) {
+        return saleRepository.findByPersonEmail(email);
+    }
+
     public List<Object[]> findTop5FrequentCustomers() {
         return saleRepository.findTop5FrequentCustomers();
     }
