@@ -69,7 +69,7 @@ class ProductControllerTest {
 
         ResponseEntity<Product> response = productController.getProductById(1L);
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertEquals(product, response.getBody());
     }
 
@@ -79,7 +79,7 @@ class ProductControllerTest {
 
         ResponseEntity<Product> response = productController.getProductById(1L);
 
-        assertEquals(404, response.getStatusCodeValue());
+        assertEquals(404, response.getStatusCode().value());
         assertNull(response.getBody());
     }
 
@@ -89,7 +89,7 @@ class ProductControllerTest {
 
         ResponseEntity<Product> response = productController.createProduct(product);
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertEquals(product, response.getBody());
     }
 
@@ -99,7 +99,7 @@ class ProductControllerTest {
 
         ResponseEntity<Product> response = productController.updateProduct(1L, product, "admin@example.com");
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertEquals(product, response.getBody());
     }
 
@@ -109,7 +109,7 @@ class ProductControllerTest {
 
         ResponseEntity<Void> response = productController.deleteProduct(1L);
 
-        assertEquals(204, response.getStatusCodeValue());
+        assertEquals(204, response.getStatusCode().value());
         verify(productService, times(1)).deleteProduct(1L);
     }
 }

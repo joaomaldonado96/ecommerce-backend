@@ -57,7 +57,7 @@ class PersonControllerTest {
 
         ResponseEntity<Person> response = personController.getPersonByEmail("test@example.com");
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertEquals(person, response.getBody());
     }
 
@@ -67,7 +67,7 @@ class PersonControllerTest {
 
         ResponseEntity<Person> response = personController.getPersonByEmail("notfound@example.com");
 
-        assertEquals(404, response.getStatusCodeValue());
+        assertEquals(404, response.getStatusCode().value());
         assertNull(response.getBody());
     }
 
@@ -77,7 +77,7 @@ class PersonControllerTest {
 
         ResponseEntity<Person> response = personController.createPerson(person);
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertEquals(person, response.getBody());
     }
 
@@ -87,7 +87,7 @@ class PersonControllerTest {
 
         ResponseEntity<Person> response = personController.createPerson(person);
 
-        assertEquals(400, response.getStatusCodeValue());
+        assertEquals(400, response.getStatusCode().value());
         assertNull(response.getBody());
     }
 
@@ -97,7 +97,7 @@ class PersonControllerTest {
 
         ResponseEntity<Person> response = personController.updatePerson("test@example.com", person);
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertEquals(person, response.getBody());
     }
 
@@ -107,7 +107,7 @@ class PersonControllerTest {
 
         ResponseEntity<Person> response = personController.updatePerson("test@example.com", person);
 
-        assertEquals(404, response.getStatusCodeValue());
+        assertEquals(404, response.getStatusCode().value());
     }
 
     @Test
@@ -116,7 +116,7 @@ class PersonControllerTest {
 
         ResponseEntity<Person> response = personController.login("test@example.com", "password");
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertEquals(person, response.getBody());
     }
 
@@ -126,7 +126,7 @@ class PersonControllerTest {
 
         ResponseEntity<Person> response = personController.login("test@example.com", "wrongpassword");
 
-        assertEquals(401, response.getStatusCodeValue());
+        assertEquals(401, response.getStatusCode().value());
     }
 
     @Test
@@ -135,7 +135,7 @@ class PersonControllerTest {
 
         ResponseEntity<Void> response = personController.deletePerson("test@example.com");
 
-        assertEquals(204, response.getStatusCodeValue());
+        assertEquals(204, response.getStatusCode().value());
         verify(personService, times(1)).deletePerson("test@example.com");
     }
 }

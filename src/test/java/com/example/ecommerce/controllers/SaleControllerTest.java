@@ -30,11 +30,10 @@ class SaleControllerTest {
     private SaleController saleController;
 
     private Sale sale;
-    private Person person;
 
     @BeforeEach
     void setUp() {
-        person = new Person();
+        Person person = new Person();
         person.setEmail("test@example.com");
         person.setPassword("securepassword");
         person.setName("Juan");
@@ -67,7 +66,7 @@ class SaleControllerTest {
 
         ResponseEntity<Sale> response = saleController.getSaleById(1L);
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertEquals(sale, response.getBody());
     }
 
@@ -77,7 +76,7 @@ class SaleControllerTest {
 
         ResponseEntity<Sale> response = saleController.getSaleById(2L);
 
-        assertEquals(404, response.getStatusCodeValue());
+        assertEquals(404, response.getStatusCode().value());
         assertNull(response.getBody());
     }
 
@@ -130,7 +129,7 @@ class SaleControllerTest {
 
         ResponseEntity<Void> response = saleController.deleteSale(1L);
 
-        assertEquals(204, response.getStatusCodeValue());
+        assertEquals(204, response.getStatusCode().value());
         verify(saleService, times(1)).deleteSale(1L);
     }
 }
