@@ -1,4 +1,5 @@
 package com.example.ecommerce.repositories;
+import com.example.ecommerce.constants.SaleProductQueries;
 import com.example.ecommerce.entities.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.ecommerce.entities.SaleProduct;
@@ -9,6 +10,6 @@ import java.util.List;
 
 public interface SaleProductRepository extends JpaRepository<SaleProduct, SaleProductPK> {
 
-    @Query("SELECT sp.product FROM SaleProduct sp GROUP BY sp.product ORDER BY SUM(sp.quantity) DESC LIMIT 5")
+    @Query(SaleProductQueries.TOP_5_BEST_SELLING_PRODUCTS)
     List<Product> findTop5BestSellingProducts();
 }

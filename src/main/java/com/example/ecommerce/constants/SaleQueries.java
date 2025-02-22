@@ -1,6 +1,7 @@
 package com.example.ecommerce.constants;
 
-public class QueryConstants {
+public class SaleQueries {
+    public static final String FIND_BY_PERSON_EMAIL = "SELECT s FROM Sale s WHERE s.person.email = :email";
     public static final String TOP_5_FREQUENT_CUSTOMERS = """
         WITH SaleDifferences AS ( 
             SELECT s.person_email, s.created_at, 
