@@ -26,8 +26,8 @@ public class SaleService {
         return saleRepository.findById(id);
     }
 
-    public List<Object[]> getTop5BestSellingProducts() {
-        return saleRepository.findTop5BestSellingProducts();
+    public List<Object[]> findTop5FrequentCustomers() {
+        return saleRepository.findTop5FrequentCustomers();
     }
 
     @Transactional

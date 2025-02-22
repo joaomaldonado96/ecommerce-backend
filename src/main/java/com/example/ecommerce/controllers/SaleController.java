@@ -28,9 +28,9 @@ class SaleController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/top-products")
-    public List<Object[]> getTop5BestSellingProducts() {
-        return saleService.getTop5BestSellingProducts();
+    @GetMapping("/top-frequent-customers")
+    public List<Object[]> findTop5FrequentCustomers() {
+        return saleService.findTop5FrequentCustomers();
     }
 
     @PostMapping

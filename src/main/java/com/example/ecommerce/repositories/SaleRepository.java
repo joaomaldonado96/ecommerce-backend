@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface SaleRepository extends JpaRepository<Sale, Long> {
     @Query(value = QueryConstants.TOP_5_FREQUENT_CUSTOMERS, nativeQuery = true)
-    List<Object[]> findTop5BestSellingProducts();
+    List<Object[]> findTop5FrequentCustomers();
 }
