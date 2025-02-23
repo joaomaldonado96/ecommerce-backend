@@ -17,8 +17,8 @@ public class SaleProductResponseDTO {
 
     public static SaleProductResponseDTO fromEntity(SaleProduct saleProduct) {
         return new SaleProductResponseDTO(
-                saleProduct.getSale() != null ? saleProduct.getSale().getId() : null,
-                saleProduct.getProduct()  != null ? saleProduct.getProduct().getId() : null ,
+                saleProduct.getId() != null ? saleProduct.getId().getSaleId() : null,
+                saleProduct.getId()  != null ? saleProduct.getId().getProductId() : null ,
                 saleProduct.getQuantity(),
                 saleProduct.getUnitPrice()
         );

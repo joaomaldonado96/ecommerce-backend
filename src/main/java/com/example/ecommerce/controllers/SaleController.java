@@ -1,10 +1,7 @@
 package com.example.ecommerce.controllers;
 
-import com.example.ecommerce.dtos.ProductResponseDTO;
 import com.example.ecommerce.dtos.SaleRequestDTO;
 import com.example.ecommerce.dtos.SaleResponseDTO;
-import com.example.ecommerce.entities.Person;
-import com.example.ecommerce.entities.Product;
 import com.example.ecommerce.entities.Sale;
 import com.example.ecommerce.repositories.PersonRepository;
 import com.example.ecommerce.services.SaleService;
@@ -18,11 +15,9 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/sales")
 class SaleController {
     private final SaleService saleService;
-    private final PersonRepository personRepository;
 
-    public SaleController(SaleService saleService, PersonRepository personRepository) {
+    public SaleController(SaleService saleService) {
         this.saleService = saleService;
-        this.personRepository = personRepository;
     }
 
     @GetMapping
