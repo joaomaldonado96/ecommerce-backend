@@ -1,5 +1,8 @@
 package com.example.ecommerce.controllers;
 
+import com.example.ecommerce.dtos.ProductRequestDTO;
+import com.example.ecommerce.dtos.ProductResponseDTO;
+import com.example.ecommerce.entities.Person;
 import com.example.ecommerce.entities.Product;
 import com.example.ecommerce.services.ProductService;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,24 +31,38 @@ class ProductControllerTest {
     private ProductController productController;
 
     private Product product;
+    private ProductRequestDTO productRequestDTO;
 
     @BeforeEach
     void setUp() {
+        Person updatedByPerson = new Person();
+        updatedByPerson.setEmail("admin@example.com");
+
         product = new Product();
         product.setId(1L);
-        product.setName("");
+        product.setName("Sample Product");
         product.setDescription("A sample product for testing");
         product.setPrice(BigDecimal.valueOf(100.0));
         product.setStock(10);
+        product.setIsActive(true);
         product.setCreatedAt(Instant.now());
         product.setUpdatedAt(Instant.now());
+        product.setUpdatedByPerson(updatedByPerson); // Asigna la persona correctamente
+
+        productRequestDTO = new ProductRequestDTO();
+        productRequestDTO.setName("Sample Product");
+        productRequestDTO.setDescription("A sample product for testing");
+        productRequestDTO.setPrice(BigDecimal.valueOf(100.0));
+        productRequestDTO.setStock(10);
+        productRequestDTO.setIsActive(true);
+        productRequestDTO.setUpdatedByEmail("admin@example.com");
     }
 
     @Test
     void testGetAllProducts() {
         when(productService.getAllProducts()).thenReturn(List.of(product));
 
-        List<Product> products = productController.getAllProducts();
+        List<ProductResponseDTO> products = productController.getAllProducts();
 
         assertFalse(products.isEmpty());
         assertEquals(1, products.size());
@@ -56,7 +73,7 @@ class ProductControllerTest {
     void testGetActiveProducts() {
         when(productService.getActiveProducts()).thenReturn(List.of(product));
 
-        List<Product> products = productController.getActiveProducts();
+        List<ProductResponseDTO> products = productController.getActiveProducts();
 
         assertFalse(products.isEmpty());
         assertEquals(1, products.size());
@@ -67,17 +84,18 @@ class ProductControllerTest {
     void testGetProductById_Found() {
         when(productService.getProductById(1L)).thenReturn(Optional.of(product));
 
-        ResponseEntity<Product> response = productController.getProductById(1L);
+        ResponseEntity<ProductResponseDTO> response = productController.getProductById(1L);
 
         assertEquals(200, response.getStatusCode().value());
-        assertEquals(product, response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(product.getId(), response.getBody().getId());
     }
 
     @Test
     void testGetProductById_NotFound() {
         when(productService.getProductById(1L)).thenReturn(Optional.empty());
 
-        ResponseEntity<Product> response = productController.getProductById(1L);
+        ResponseEntity<ProductResponseDTO> response = productController.getProductById(1L);
 
         assertEquals(404, response.getStatusCode().value());
         assertNull(response.getBody());
@@ -85,22 +103,24 @@ class ProductControllerTest {
 
     @Test
     void testCreateProduct_Success() {
-        when(productService.saveProduct(product)).thenReturn(product);
+        when(productService.saveProduct(any(Product.class), anyString())).thenReturn(product);
 
-        ResponseEntity<Product> response = productController.createProduct(product);
+        ResponseEntity<ProductResponseDTO> response = productController.createProduct(productRequestDTO);
 
         assertEquals(200, response.getStatusCode().value());
-        assertEquals(product, response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(product.getName(), response.getBody().getName());
     }
 
     @Test
     void testUpdateProduct_Success() {
         when(productService.updateProduct(eq(1L), any(Product.class), anyString())).thenReturn(product);
 
-        ResponseEntity<Product> response = productController.updateProduct(1L, product, "admin@example.com");
+        ResponseEntity<ProductResponseDTO> response = productController.updateProduct(1L, productRequestDTO);
 
         assertEquals(200, response.getStatusCode().value());
-        assertEquals(product, response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(product.getName(), response.getBody().getName());
     }
 
     @Test

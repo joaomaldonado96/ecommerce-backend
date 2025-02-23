@@ -64,7 +64,7 @@ class ProductServiceTest {
         product.setPrice(BigDecimal.ZERO);
 
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
-            productService.saveProduct(product);
+            productService.saveProduct(product, "admin@example.com");
         });
 
         assertEquals("El precio debe ser mayor a 0", thrown.getMessage());
@@ -78,7 +78,7 @@ class ProductServiceTest {
         product.setStock(-1);
 
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
-            productService.saveProduct(product);
+            productService.saveProduct(product, "admin@example.com");
         });
 
         assertEquals("El stock no puede ser negativo", thrown.getMessage());
@@ -86,13 +86,18 @@ class ProductServiceTest {
     }
 
     @Test
-    void testSaveProductSuccessfully() {
+    void testSaveProductSuccessfully()  {
         Product product = new Product();
         product.setPrice(BigDecimal.TEN);
         product.setStock(10);
+
+        Person person = new Person();
+        person.setEmail("user1@example.com");
+
+        when(personRepository.findById("user1@example.com")).thenReturn(Optional.of(person));
         when(productRepository.save(any(Product.class))).thenReturn(product);
 
-        Product savedProduct = productService.saveProduct(product);
+        Product savedProduct = productService.saveProduct(product, "user1@example.com");
 
         assertNotNull(savedProduct);
         assertEquals(BigDecimal.TEN, savedProduct.getPrice());

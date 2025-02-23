@@ -1,15 +1,18 @@
 package com.example.ecommerce.controllers;
 
+import com.example.ecommerce.dtos.ProductRequestDTO;
+import com.example.ecommerce.dtos.ProductResponseDTO;
 import com.example.ecommerce.entities.Product;
 import com.example.ecommerce.services.ProductService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/products")
-class ProductController {
+class ProductController{
     private final ProductService productService;
 
     public ProductController(ProductService productService) {
@@ -17,30 +20,36 @@ class ProductController {
     }
 
     @GetMapping
-    public List<Product> getAllProducts() {
-        return productService.getAllProducts();
+    public List<ProductResponseDTO> getAllProducts() {
+        return productService.getAllProducts().stream()
+                .map(ProductResponseDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/active")
-    public List<Product> getActiveProducts() {
-        return productService.getActiveProducts();
+    public List<ProductResponseDTO> getActiveProducts() {
+        return productService.getActiveProducts().stream()
+                .map(ProductResponseDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
+    public ResponseEntity<ProductResponseDTO> getProductById(@PathVariable Long id) {
         return productService.getProductById(id)
-                .map(ResponseEntity::ok)
+                .map(product -> ResponseEntity.ok(ProductResponseDTO.fromEntity(product)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
-        return ResponseEntity.ok(productService.saveProduct(product));
+    public ResponseEntity<ProductResponseDTO> createProduct(@RequestBody ProductRequestDTO productRequestDTO) {
+        Product product = productService.saveProduct(productRequestDTO.toEntity(), productRequestDTO.getUpdatedByEmail());
+        return ResponseEntity.ok(ProductResponseDTO.fromEntity(product));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product, @RequestBody String updatedByEmail) {
-        return ResponseEntity.ok(productService.updateProduct(id, product, updatedByEmail));
+    public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable Long id, @RequestBody ProductRequestDTO productRequestDTO) {
+        Product updatedProduct = productService.updateProduct(id, productRequestDTO.toEntity(), productRequestDTO.getUpdatedByEmail());
+        return ResponseEntity.ok(ProductResponseDTO.fromEntity(updatedProduct));
     }
 
     @DeleteMapping("/{id}")

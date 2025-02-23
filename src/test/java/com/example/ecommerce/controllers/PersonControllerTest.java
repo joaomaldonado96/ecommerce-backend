@@ -1,5 +1,7 @@
 package com.example.ecommerce.controllers;
 
+import com.example.ecommerce.dtos.PersonRequestDTO;
+import com.example.ecommerce.dtos.PersonResponseDTO;
 import com.example.ecommerce.entities.Person;
 import com.example.ecommerce.services.PersonService;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +29,8 @@ class PersonControllerTest {
     private PersonController personController;
 
     private Person person;
+    private PersonRequestDTO personRequestDTO;
+    private PersonResponseDTO personResponseDTO;
 
     @BeforeEach
     void setUp() {
@@ -38,13 +42,16 @@ class PersonControllerTest {
         person.setPhone("1234567890");
         person.setIsFrequentCustomer(false);
         person.setCreatedAt(Instant.now());
+
+        personRequestDTO = new PersonRequestDTO("test@example.com", "securepassword", "Juan", "123 Test Street", "1234567890", false);
+        personResponseDTO = new PersonResponseDTO("test@example.com", "Juan", "123 Test Street", "1234567890", false, person.getCreatedAt());
     }
 
     @Test
     void testGetAllPersons() {
         when(personService.getAllPersons()).thenReturn(List.of(person));
 
-        List<Person> persons = personController.getAllPersons();
+        List<PersonResponseDTO> persons = personController.getAllPersons();
 
         assertFalse(persons.isEmpty());
         assertEquals(1, persons.size());
@@ -55,17 +62,17 @@ class PersonControllerTest {
     void testGetPersonByEmail_Found() {
         when(personService.getPersonByEmail("test@example.com")).thenReturn(Optional.of(person));
 
-        ResponseEntity<Person> response = personController.getPersonByEmail("test@example.com");
+        ResponseEntity<PersonResponseDTO> response = personController.getPersonByEmail("test@example.com");
 
         assertEquals(200, response.getStatusCode().value());
-        assertEquals(person, response.getBody());
+        assertEquals(personResponseDTO.getEmail(), response.getBody().getEmail());
     }
 
     @Test
     void testGetPersonByEmail_NotFound() {
         when(personService.getPersonByEmail("notfound@example.com")).thenReturn(Optional.empty());
 
-        ResponseEntity<Person> response = personController.getPersonByEmail("notfound@example.com");
+        ResponseEntity<PersonResponseDTO> response = personController.getPersonByEmail("notfound@example.com");
 
         assertEquals(404, response.getStatusCode().value());
         assertNull(response.getBody());
@@ -73,19 +80,19 @@ class PersonControllerTest {
 
     @Test
     void testCreatePerson_Success() {
-        when(personService.savePerson(person)).thenReturn(person);
+        when(personService.savePerson(any(Person.class))).thenReturn(person);
 
-        ResponseEntity<Person> response = personController.createPerson(person);
+        ResponseEntity<PersonResponseDTO> response = personController.createPerson(personRequestDTO);
 
         assertEquals(200, response.getStatusCode().value());
-        assertEquals(person, response.getBody());
+        assertEquals(personResponseDTO.getEmail(), response.getBody().getEmail());
     }
 
     @Test
     void testCreatePerson_BadRequest() {
-        when(personService.savePerson(person)).thenThrow(IllegalArgumentException.class);
+        when(personService.savePerson(any(Person.class))).thenThrow(IllegalArgumentException.class);
 
-        ResponseEntity<Person> response = personController.createPerson(person);
+        ResponseEntity<PersonResponseDTO> response = personController.createPerson(personRequestDTO);
 
         assertEquals(400, response.getStatusCode().value());
         assertNull(response.getBody());
@@ -95,17 +102,17 @@ class PersonControllerTest {
     void testUpdatePerson_Success() {
         when(personService.updatePerson(eq("test@example.com"), any(Person.class))).thenReturn(person);
 
-        ResponseEntity<Person> response = personController.updatePerson("test@example.com", person);
+        ResponseEntity<PersonResponseDTO> response = personController.updatePerson("test@example.com", personRequestDTO);
 
         assertEquals(200, response.getStatusCode().value());
-        assertEquals(person, response.getBody());
+        assertEquals(personResponseDTO.getEmail(), response.getBody().getEmail());
     }
 
     @Test
     void testUpdatePerson_NotFound() {
         when(personService.updatePerson(eq("test@example.com"), any(Person.class))).thenThrow(IllegalArgumentException.class);
 
-        ResponseEntity<Person> response = personController.updatePerson("test@example.com", person);
+        ResponseEntity<PersonResponseDTO> response = personController.updatePerson("test@example.com", personRequestDTO);
 
         assertEquals(404, response.getStatusCode().value());
     }
@@ -114,17 +121,17 @@ class PersonControllerTest {
     void testLogin_Success() {
         when(personService.login("test@example.com", "password")).thenReturn(Optional.of(person));
 
-        ResponseEntity<Person> response = personController.login("test@example.com", "password");
+        ResponseEntity<PersonResponseDTO> response = personController.login("test@example.com", "password");
 
         assertEquals(200, response.getStatusCode().value());
-        assertEquals(person, response.getBody());
+        assertEquals(personResponseDTO.getEmail(), response.getBody().getEmail());
     }
 
     @Test
     void testLogin_Unauthorized() {
         when(personService.login("test@example.com", "wrongpassword")).thenReturn(Optional.empty());
 
-        ResponseEntity<Person> response = personController.login("test@example.com", "wrongpassword");
+        ResponseEntity<PersonResponseDTO> response = personController.login("test@example.com", "wrongpassword");
 
         assertEquals(401, response.getStatusCode().value());
     }

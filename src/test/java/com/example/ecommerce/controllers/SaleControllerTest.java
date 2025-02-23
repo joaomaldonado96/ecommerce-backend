@@ -1,7 +1,13 @@
 package com.example.ecommerce.controllers;
 
-
-import com.example.ecommerce.dtos.SaleDTO;
+import com.example.ecommerce.dtos.ProductRequestDTO;
+import com.example.ecommerce.dtos.ProductResponseDTO;
+import com.example.ecommerce.dtos.SaleRequestDTO;
+import com.example.ecommerce.dtos.SaleResponseDTO;
+import com.example.ecommerce.entities.Person;
+import com.example.ecommerce.entities.Product;
+import com.example.ecommerce.entities.Sale;
+import com.example.ecommerce.services.ProductService;
 import com.example.ecommerce.services.SaleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class SaleControllerTest {
+public class SaleControllerTest {
 
     @Mock
     private SaleService saleService;
@@ -28,69 +35,76 @@ class SaleControllerTest {
     @InjectMocks
     private SaleController saleController;
 
-    private SaleDTO saleDTO;
+    private SaleRequestDTO saleRequestDTO;
+    private SaleResponseDTO saleResponseDTO;
+    private Sale sale;
 
     @BeforeEach
-    void setUp() {
-        saleDTO = new SaleDTO();
-        saleDTO.setId(1L);
-        saleDTO.setCreatedAt(Instant.now());
-        saleDTO.setDiscount(BigDecimal.valueOf(10.0));
-        saleDTO.setPersonEmail("test@example.com");
+    public void setUp() {
+        saleRequestDTO = new SaleRequestDTO();
+        saleRequestDTO.setPersonEmail("test@example.com");
+        saleRequestDTO.setDiscount(BigDecimal.valueOf(10.0));
+
+        Person person = new Person();
+        person.setEmail("test@example.com");
+
+        sale = new Sale();
+        sale.setId(1L);
+        sale.setCreatedAt(Instant.now());
+        sale.setPerson(person);
+        sale.setDiscount(BigDecimal.valueOf(10.0));
+
     }
 
     @Test
-    void testGetAllSales() {
-        when(saleService.getAllSales()).thenReturn(List.of(saleDTO));
+    public void testGetAllSales() {
+        when(saleService.getAllSales()).thenReturn(List.of(sale));
 
-        ResponseEntity<List<SaleDTO>> response = saleController.getAllSales();
+        List<SaleResponseDTO> response = saleController.getAllSales();
 
-        assertNotNull(response.getBody());
-        assertFalse(response.getBody().isEmpty());
-        assertEquals(1, response.getBody().size());
-        assertEquals(saleDTO, response.getBody().get(0));
-
+        assertFalse(response.isEmpty());
+        assertEquals(1, response.size());
         verify(saleService, times(1)).getAllSales();
     }
 
     @Test
-    void testGetSaleById_Found() {
-        when(saleService.getSaleById(1L)).thenReturn(Optional.of(saleDTO));
+    public void testGetSaleById_Found() {
+        when(saleService.getSaleById(1L)).thenReturn(Optional.of(sale));
 
-        ResponseEntity<SaleDTO> response = saleController.getSaleById(1L);
+        ResponseEntity<SaleResponseDTO> response = saleController.getSaleById(1L);
 
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
-        assertEquals(saleDTO, response.getBody());
+        assertEquals(sale.getId(), response.getBody().getId());
     }
 
     @Test
-    void testGetSaleById_NotFound() {
+    public void testGetSaleById_NotFound() {
         when(saleService.getSaleById(2L)).thenReturn(Optional.empty());
 
-        ResponseEntity<SaleDTO> response = saleController.getSaleById(2L);
+        ResponseEntity<SaleResponseDTO> response = saleController.getSaleById(2L);
 
         assertEquals(404, response.getStatusCode().value());
         assertNull(response.getBody());
     }
 
     @Test
-    void testGetSalesByPersonEmail() {
-        when(saleService.getSalesByPersonEmail("test@example.com")).thenReturn(List.of(saleDTO));
+    public void testGetSalesByPersonEmail() {
+        when(saleService.getSalesByPersonEmail("test@example.com")).thenReturn(List.of(sale));
 
-        ResponseEntity<List<SaleDTO>> response = saleController.getSalesByPersonEmail("test@example.com");
+        List<SaleResponseDTO> response = saleController.getSalesByPersonEmail("test@example.com");
 
-        assertNotNull(response.getBody());
-        assertFalse(response.getBody().isEmpty());
-        assertEquals(1, response.getBody().size());
-        assertEquals("test@example.com", response.getBody().get(0).getPersonEmail());
+        assertNotNull(response);
+        assertFalse(response.isEmpty());
+        assertEquals(1, response.size());
+        assertEquals(sale.getPerson().getEmail(), response.get(0).getPersonEmail());
 
         verify(saleService, times(1)).getSalesByPersonEmail("test@example.com");
     }
 
     @Test
-    void testFindTop5FrequentCustomers() {
-        List<Object[]> topCustomers = List.of(
+    public void testFindTop5FrequentCustomers() {
+        List<Object[]> topCustomers = Arrays.asList(
                 new Object[]{"test@example.com", "Juan", 2.5},
                 new Object[]{"customer2@example.com", "Customer Two", 3.7},
                 new Object[]{"customer3@example.com", "Customer Three", 4.1},
@@ -99,30 +113,31 @@ class SaleControllerTest {
         );
         when(saleService.findTop5FrequentCustomers()).thenReturn(topCustomers);
 
-        ResponseEntity<List<Object[]>> response = saleController.findTop5FrequentCustomers();
+        List<Object[]> response = saleController.findTop5FrequentCustomers();
 
-        assertNotNull(response.getBody());
-        assertEquals(5, response.getBody().size());
-        assertArrayEquals(topCustomers.get(0), response.getBody().get(0));
+        assertNotNull(response);
+        assertFalse(response.isEmpty());
+        assertEquals(5, response.size());
+        assertArrayEquals(topCustomers.get(0), response.get(0));
 
         verify(saleService, times(1)).findTop5FrequentCustomers();
     }
 
     @Test
-    void testCreateSale() {
-        when(saleService.saveSale(saleDTO)).thenReturn(saleDTO);
+    public void testCreateSale() {
+        when(saleService.saveSale(any(Sale.class), eq("test@example.com"))).thenReturn(sale);
 
-        ResponseEntity<SaleDTO> response = saleController.createSale(saleDTO);
+        ResponseEntity<SaleResponseDTO> response = saleController.createSale(saleRequestDTO);
 
         assertNotNull(response.getBody());
-        assertEquals(saleDTO, response.getBody());
-        assertEquals(201, response.getStatusCode().value());
+        assertEquals(sale.getId(), response.getBody().getId());
+        assertEquals(200, response.getStatusCode().value());
 
-        verify(saleService, times(1)).saveSale(saleDTO);
+        verify(saleService, times(1)).saveSale(any(Sale.class), eq("test@example.com"));
     }
 
     @Test
-    void testDeleteSale() {
+    public void testDeleteSale() {
         doNothing().when(saleService).deleteSale(1L);
 
         ResponseEntity<Void> response = saleController.deleteSale(1L);

@@ -33,13 +33,18 @@ public class ProductService {
     }
 
     @Transactional
-    public Product saveProduct(Product product) {
+    public Product saveProduct(Product product, String updatedByEmail) {
         if (product.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("El precio debe ser mayor a 0");
         }
         if (product.getStock() < 0) {
             throw new IllegalArgumentException("El stock no puede ser negativo");
         }
+
+        Person updatedByPerson = personRepository.findById(updatedByEmail)
+                .orElseThrow(() -> new IllegalArgumentException("No se encontró la persona con el email proporcionado"));
+
+        product.setUpdatedByPerson(updatedByPerson);
         return productRepository.save(product);
     }
 

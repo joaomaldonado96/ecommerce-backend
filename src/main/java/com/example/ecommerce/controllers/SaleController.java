@@ -1,50 +1,60 @@
 package com.example.ecommerce.controllers;
 
-import com.example.ecommerce.dtos.SaleDTO;
+import com.example.ecommerce.dtos.ProductResponseDTO;
+import com.example.ecommerce.dtos.SaleRequestDTO;
+import com.example.ecommerce.dtos.SaleResponseDTO;
+import com.example.ecommerce.entities.Person;
+import com.example.ecommerce.entities.Product;
 import com.example.ecommerce.entities.Sale;
+import com.example.ecommerce.repositories.PersonRepository;
 import com.example.ecommerce.services.SaleService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/sales")
 class SaleController {
     private final SaleService saleService;
+    private final PersonRepository personRepository;
 
-    public SaleController(SaleService saleService) {
+    public SaleController(SaleService saleService, PersonRepository personRepository) {
         this.saleService = saleService;
+        this.personRepository = personRepository;
     }
 
     @GetMapping
-    public ResponseEntity<List<SaleDTO>> getAllSales() {
-        return ResponseEntity.ok(saleService.getAllSales());
+    public List<SaleResponseDTO> getAllSales() {
+        return saleService.getAllSales().stream()
+                .map(SaleResponseDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SaleDTO> getSaleById(@PathVariable Long id) {
+    public ResponseEntity<SaleResponseDTO> getSaleById(@PathVariable Long id) {
         return saleService.getSaleById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .map(sale -> ResponseEntity.ok(SaleResponseDTO.fromEntity(sale)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/person/{email}")
-    public ResponseEntity<List<SaleDTO>> getSalesByPersonEmail(@PathVariable String email) {
-        List<SaleDTO> sales = saleService.getSalesByPersonEmail(email);
-        return ResponseEntity.ok(sales);
+    public List<SaleResponseDTO> getSalesByPersonEmail(@PathVariable String email) {
+        return saleService.getSalesByPersonEmail(email).stream()
+                .map(SaleResponseDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/top-frequent-customers")
-    public ResponseEntity<List<Object[]>> findTop5FrequentCustomers() {
-        return ResponseEntity.ok(saleService.findTop5FrequentCustomers());
+    public List<Object[]> findTop5FrequentCustomers() {
+        return saleService.findTop5FrequentCustomers();
     }
 
     @PostMapping
-    public ResponseEntity<SaleDTO> createSale(@RequestBody SaleDTO saleDTO) {
-        SaleDTO savedSale = saleService.saveSale(saleDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedSale);
+    public ResponseEntity<SaleResponseDTO> createSale(@RequestBody SaleRequestDTO saleRequestDTO) {
+        Sale sale = saleService.saveSale(saleRequestDTO.toEntity(), saleRequestDTO.getPersonEmail());
+        return ResponseEntity.ok(SaleResponseDTO.fromEntity(sale));
     }
 
     @DeleteMapping("/{id}")
