@@ -1,7 +1,9 @@
 package com.example.ecommerce.controllers;
 
+import com.example.ecommerce.dtos.SaleDTO;
 import com.example.ecommerce.entities.Sale;
 import com.example.ecommerce.services.SaleService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,30 +19,32 @@ class SaleController {
     }
 
     @GetMapping
-    public List<Sale> getAllSales() {
-        return saleService.getAllSales();
+    public ResponseEntity<List<SaleDTO>> getAllSales() {
+        return ResponseEntity.ok(saleService.getAllSales());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Sale> getSaleById(@PathVariable Long id) {
+    public ResponseEntity<SaleDTO> getSaleById(@PathVariable Long id) {
         return saleService.getSaleById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/person/{email}")
-    public List<Sale> getSalesByPersonEmail(@PathVariable String email) {
-        return saleService.getSalesByPersonEmail(email);
+    public ResponseEntity<List<SaleDTO>> getSalesByPersonEmail(@PathVariable String email) {
+        List<SaleDTO> sales = saleService.getSalesByPersonEmail(email);
+        return ResponseEntity.ok(sales);
     }
 
     @GetMapping("/top-frequent-customers")
-    public List<Object[]> findTop5FrequentCustomers() {
-        return saleService.findTop5FrequentCustomers();
+    public ResponseEntity<List<Object[]>> findTop5FrequentCustomers() {
+        return ResponseEntity.ok(saleService.findTop5FrequentCustomers());
     }
 
     @PostMapping
-    public Sale createSale(@RequestBody Sale sale) {
-        return saleService.saveSale(sale);
+    public ResponseEntity<SaleDTO> createSale(@RequestBody SaleDTO saleDTO) {
+        SaleDTO savedSale = saleService.saveSale(saleDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedSale);
     }
 
     @DeleteMapping("/{id}")

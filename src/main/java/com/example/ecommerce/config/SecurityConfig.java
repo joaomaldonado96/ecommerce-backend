@@ -20,8 +20,13 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Configurar CORS correctamente
                 .csrf(csrf -> csrf.disable()) // Deshabilitar CSRF para APIs REST
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/public/**").permitAll() // Permitir acceso a /api/sales
-                        .requestMatchers("/api/**").permitAll() // Rutas protegidas requieren autenticación
+                        .requestMatchers("/api/public/**").permitAll() // Permitir acceso
+                        .requestMatchers("/api/**").permitAll()
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/actuator/**",
+                                "/swagger-ui.html").permitAll()
                 )
                 .formLogin(form -> form.disable()) // Deshabilitar login con formulario
                 .httpBasic(httpBasic -> httpBasic.disable()); // Deshabilitar HTTP Basic

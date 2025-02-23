@@ -1,8 +1,7 @@
 package com.example.ecommerce.controllers;
 
 
-import com.example.ecommerce.entities.Person;
-import com.example.ecommerce.entities.Sale;
+import com.example.ecommerce.dtos.SaleDTO;
 import com.example.ecommerce.services.SaleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,52 +28,47 @@ class SaleControllerTest {
     @InjectMocks
     private SaleController saleController;
 
-    private Sale sale;
+    private SaleDTO saleDTO;
 
     @BeforeEach
     void setUp() {
-        Person person = new Person();
-        person.setEmail("test@example.com");
-        person.setPassword("securepassword");
-        person.setName("Juan");
-        person.setAddress("123 Test Street");
-        person.setPhone("1234567890");
-        person.setIsFrequentCustomer(false);
-        person.setCreatedAt(Instant.now());
-
-        sale = new Sale();
-        sale.setId(1L);
-        sale.setCreatedAt(Instant.now());
-        sale.setDiscount(BigDecimal.valueOf(10.0));
-        sale.setPerson(person);
+        saleDTO = new SaleDTO();
+        saleDTO.setId(1L);
+        saleDTO.setCreatedAt(Instant.now());
+        saleDTO.setDiscount(BigDecimal.valueOf(10.0));
+        saleDTO.setPersonEmail("test@example.com");
     }
 
     @Test
     void testGetAllSales() {
-        when(saleService.getAllSales()).thenReturn(List.of(sale));
+        when(saleService.getAllSales()).thenReturn(List.of(saleDTO));
 
-        List<Sale> sales = saleController.getAllSales();
+        ResponseEntity<List<SaleDTO>> response = saleController.getAllSales();
 
-        assertFalse(sales.isEmpty());
-        assertEquals(1, sales.size());
+        assertNotNull(response.getBody());
+        assertFalse(response.getBody().isEmpty());
+        assertEquals(1, response.getBody().size());
+        assertEquals(saleDTO, response.getBody().get(0));
+
         verify(saleService, times(1)).getAllSales();
     }
 
     @Test
     void testGetSaleById_Found() {
-        when(saleService.getSaleById(1L)).thenReturn(Optional.of(sale));
+        when(saleService.getSaleById(1L)).thenReturn(Optional.of(saleDTO));
 
-        ResponseEntity<Sale> response = saleController.getSaleById(1L);
+        ResponseEntity<SaleDTO> response = saleController.getSaleById(1L);
 
         assertEquals(200, response.getStatusCode().value());
-        assertEquals(sale, response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(saleDTO, response.getBody());
     }
 
     @Test
     void testGetSaleById_NotFound() {
         when(saleService.getSaleById(2L)).thenReturn(Optional.empty());
 
-        ResponseEntity<Sale> response = saleController.getSaleById(2L);
+        ResponseEntity<SaleDTO> response = saleController.getSaleById(2L);
 
         assertEquals(404, response.getStatusCode().value());
         assertNull(response.getBody());
@@ -82,13 +76,15 @@ class SaleControllerTest {
 
     @Test
     void testGetSalesByPersonEmail() {
-        when(saleService.getSalesByPersonEmail("test@example.com")).thenReturn(List.of(sale));
+        when(saleService.getSalesByPersonEmail("test@example.com")).thenReturn(List.of(saleDTO));
 
-        List<Sale> sales = saleController.getSalesByPersonEmail("test@example.com");
+        ResponseEntity<List<SaleDTO>> response = saleController.getSalesByPersonEmail("test@example.com");
 
-        assertFalse(sales.isEmpty());
-        assertEquals(1, sales.size());
-        assertEquals("test@example.com", sales.get(0).getPerson().getEmail());
+        assertNotNull(response.getBody());
+        assertFalse(response.getBody().isEmpty());
+        assertEquals(1, response.getBody().size());
+        assertEquals("test@example.com", response.getBody().get(0).getPersonEmail());
+
         verify(saleService, times(1)).getSalesByPersonEmail("test@example.com");
     }
 
@@ -103,24 +99,26 @@ class SaleControllerTest {
         );
         when(saleService.findTop5FrequentCustomers()).thenReturn(topCustomers);
 
-        List<Object[]> response = saleController.findTop5FrequentCustomers();
+        ResponseEntity<List<Object[]>> response = saleController.findTop5FrequentCustomers();
 
-        assertEquals(5, response.size());
-        assertEquals("test@example.com", response.get(0)[0]);
-        assertEquals("Juan", response.get(0)[1]);
-        assertEquals(2.5, (double) response.get(0)[2]);
+        assertNotNull(response.getBody());
+        assertEquals(5, response.getBody().size());
+        assertArrayEquals(topCustomers.get(0), response.getBody().get(0));
 
         verify(saleService, times(1)).findTop5FrequentCustomers();
     }
 
     @Test
     void testCreateSale() {
-        when(saleService.saveSale(sale)).thenReturn(sale);
+        when(saleService.saveSale(saleDTO)).thenReturn(saleDTO);
 
-        Sale response = saleController.createSale(sale);
+        ResponseEntity<SaleDTO> response = saleController.createSale(saleDTO);
 
-        assertEquals(sale, response);
-        verify(saleService, times(1)).saveSale(sale);
+        assertNotNull(response.getBody());
+        assertEquals(saleDTO, response.getBody());
+        assertEquals(201, response.getStatusCode().value());
+
+        verify(saleService, times(1)).saveSale(saleDTO);
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.example.ecommerce.services;
 
+import com.example.ecommerce.dtos.SaleDTO;
 import com.example.ecommerce.entities.Person;
 import com.example.ecommerce.entities.Sale;
 import com.example.ecommerce.repositories.PersonRepository;
@@ -30,6 +31,7 @@ public class SaleServiceTest {
 
     private Sale sale;
     private Person person;
+    private SaleDTO saleDTO;
 
     @BeforeEach
     public void setUp() {
@@ -39,52 +41,61 @@ public class SaleServiceTest {
         person.setEmail("test@example.com");
 
         sale = new Sale();
+        sale.setId(1L);
         sale.setDiscount(BigDecimal.valueOf(10));
         sale.setCreatedAt(Instant.now());
         sale.setPerson(person);
+
+        saleDTO = new SaleDTO();
+        saleDTO.setId(1L);
+        saleDTO.setPersonEmail(person.getEmail());
+        saleDTO.setCreatedAt(sale.getCreatedAt());
+        saleDTO.setDiscount(sale.getDiscount());
     }
 
     @Test
     public void testGetAllSales() {
+        when(saleRepository.findAll()).thenReturn(Arrays.asList(sale));
 
-        Sale sale1 = new Sale();
-        sale1.setDiscount(BigDecimal.valueOf(5));
-        sale1.setCreatedAt(Instant.now());
+        List<SaleDTO> sales = saleService.getAllSales();
 
-        Sale sale2 = new Sale();
-        sale2.setDiscount(BigDecimal.valueOf(15));
-        sale2.setCreatedAt(Instant.now());
-
-        when(saleRepository.findAll()).thenReturn(Arrays.asList(sale1, sale2));
-        List<Sale> sales = saleService.getAllSales();
         assertNotNull(sales);
-        assertEquals(2, sales.size());
+        assertEquals(1, sales.size());
+        assertEquals(saleDTO.getDiscount(), sales.get(0).getDiscount());
+        assertEquals(saleDTO.getPersonEmail(), sales.get(0).getPersonEmail());
+
+        verify(saleRepository, times(1)).findAll();
     }
 
     @Test
     public void testGetSaleById() {
         when(saleRepository.findById(1L)).thenReturn(Optional.of(sale));
-        Optional<Sale> foundSale = saleService.getSaleById(1L);
+
+        Optional<SaleDTO> foundSale = saleService.getSaleById(1L);
+
         assertTrue(foundSale.isPresent());
-        assertEquals(sale.getDiscount(), foundSale.get().getDiscount());
+        assertEquals(saleDTO.getDiscount(), foundSale.get().getDiscount());
+        assertEquals(saleDTO.getPersonEmail(), foundSale.get().getPersonEmail());
     }
 
     @Test
     public void testGetSalesByPersonEmail() {
         when(saleRepository.findByPersonEmail(person.getEmail())).thenReturn(Arrays.asList(sale));
-        List<Sale> sales = saleService.getSalesByPersonEmail(person.getEmail());
+
+        List<SaleDTO> sales = saleService.getSalesByPersonEmail(person.getEmail());
+
         assertNotNull(sales);
         assertEquals(1, sales.size());
-        assertEquals(person.getEmail(), sales.get(0).getPerson().getEmail());
+        assertEquals(person.getEmail(), sales.get(0).getPersonEmail());
     }
 
     @Test
     public void testFindTop5FrequentCustomers() {
-        Object[] customer1 = { "test1@example.com", "Customer 1", 5.5 }; // Cliente 1, con un promedio de 5.5 días entre compras
-        Object[] customer2 = { "test2@example.com", "Customer 2", 6.0 }; // Cliente 2, con un promedio de 6.0 días
-        Object[] customer3 = { "test3@example.com", "Customer 3", 7.2 }; // Cliente 3, con un promedio de 7.2 días
-        Object[] customer4 = { "test4@example.com", "Customer 4", 8.0 }; // Cliente 4, con un promedio de 8.0 días
-        Object[] customer5 = { "test5@example.com", "Customer 5", 9.1 }; // Cliente 5, con un promedio de 9.1 días
+        Object[] customer1 = { "test1@example.com", "Customer 1", 5.5 };
+        Object[] customer2 = { "test2@example.com", "Customer 2", 6.0 };
+        Object[] customer3 = { "test3@example.com", "Customer 3", 7.2 };
+        Object[] customer4 = { "test4@example.com", "Customer 4", 8.0 };
+        Object[] customer5 = { "test5@example.com", "Customer 5", 9.1 };
 
         when(saleRepository.findTop5FrequentCustomers())
                 .thenReturn(Arrays.asList(customer1, customer2, customer3, customer4, customer5));
@@ -93,7 +104,6 @@ public class SaleServiceTest {
 
         assertNotNull(topCustomers);
         assertEquals(5, topCustomers.size());
-
         assertArrayEquals(customer1, topCustomers.get(0));
         assertArrayEquals(customer2, topCustomers.get(1));
         assertArrayEquals(customer3, topCustomers.get(2));
@@ -101,22 +111,25 @@ public class SaleServiceTest {
         assertArrayEquals(customer5, topCustomers.get(4));
     }
 
-
-
     @Test
     public void testSaveSale_Success() {
-        when(personRepository.existsByEmail(person.getEmail())).thenReturn(true);
-        when(saleRepository.save(sale)).thenReturn(sale);
-        Sale savedSale = saleService.saveSale(sale);
+        when(personRepository.findById(person.getEmail())).thenReturn(Optional.of(person));
+        when(saleRepository.save(any(Sale.class))).thenReturn(sale);
+
+        SaleDTO savedSale = saleService.saveSale(saleDTO);
+
         assertNotNull(savedSale);
-        assertEquals(sale.getDiscount(), savedSale.getDiscount());
-        assertNotNull(savedSale.getCreatedAt());
+        assertEquals(saleDTO.getDiscount(), savedSale.getDiscount());
+        assertEquals(saleDTO.getPersonEmail(), savedSale.getPersonEmail());
+
+        verify(saleRepository, times(1)).save(any(Sale.class));
     }
 
     @Test
     public void testSaveSale_PersonNotFound() {
-        when(personRepository.existsByEmail(person.getEmail())).thenReturn(false);
-        assertThrows(IllegalArgumentException.class, () -> saleService.saveSale(sale));
+        when(personRepository.findById(person.getEmail())).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> saleService.saveSale(saleDTO));
     }
 
     @Test
