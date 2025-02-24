@@ -1,9 +1,6 @@
 package com.example.ecommerce.controllers;
 
-import com.example.ecommerce.dtos.ProductRequestDTO;
-import com.example.ecommerce.dtos.ProductResponseDTO;
-import com.example.ecommerce.dtos.SaleRequestDTO;
-import com.example.ecommerce.dtos.SaleResponseDTO;
+import com.example.ecommerce.dtos.*;
 import com.example.ecommerce.entities.Person;
 import com.example.ecommerce.entities.Product;
 import com.example.ecommerce.entities.Sale;
@@ -105,20 +102,22 @@ public class SaleControllerTest {
     @Test
     public void testFindTop5FrequentCustomers() {
         List<Object[]> topCustomers = Arrays.asList(
-                new Object[]{"test@example.com", "Juan", 2.5},
-                new Object[]{"customer2@example.com", "Customer Two", 3.7},
-                new Object[]{"customer3@example.com", "Customer Three", 4.1},
-                new Object[]{"customer4@example.com", "Customer Four", 5.2},
-                new Object[]{"customer5@example.com", "Customer Five", 6.0}
+                new Object[]{"test@example.com", "Juan", "2.5"},
+                new Object[]{"customer2@example.com", "Customer Two", "3.7"},
+                new Object[]{"customer3@example.com", "Customer Three", "4.1"},
+                new Object[]{"customer4@example.com", "Customer Four","5.2"},
+                new Object[]{"customer5@example.com", "Customer Five", "6.0"}
         );
         when(saleService.findTop5FrequentCustomers()).thenReturn(topCustomers);
+        List<TopFrequentCustomersDTO> response = TopFrequentCustomersDTO.mapToTopFrequentCustomersDTO(
+                topCustomers);
 
-        List<Object[]> response = saleController.findTop5FrequentCustomers();
+        List<TopFrequentCustomersDTO> customers = saleController.findTop5FrequentCustomers();
 
-        assertNotNull(response);
+        assertNotNull(customers);
         assertFalse(response.isEmpty());
         assertEquals(5, response.size());
-        assertArrayEquals(topCustomers.get(0), response.get(0));
+        assertEquals(response.get(0).getEmail(), customers.get(0).getEmail());
 
         verify(saleService, times(1)).findTop5FrequentCustomers();
     }
